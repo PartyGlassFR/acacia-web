@@ -1,7 +1,13 @@
-// --- Initialize Proxy Engine (Serverless CDN Setup) ---
+// --- Initialize Proxy Engine (Fixing the CORS Silent Crash) ---
 async function initProxy() {
     try {
-        const connection = new BareMux.BareMuxConnection("https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-mux@2.0.1/dist/worker.js");
+        // HACK: Browsers strictly block Web Workers from other websites. 
+        // We create a fake local file (Blob) to bypass the security block!
+        const workerCode = `importScripts("https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-mux@2.0.1/dist/worker.js");`;
+        const workerBlob = new Blob([workerCode], { type: "text/javascript" });
+        const workerUrl = URL.createObjectURL(workerBlob);
+
+        const connection = new BareMux.BareMuxConnection(workerUrl);
         
         const bareServers = [
             "https://tomp.app/",
@@ -12,7 +18,6 @@ async function initProxy() {
         await connection.setTransport("https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-as-module3@2.0.1/dist/index.mjs", bareServers);
         
         if ('serviceWorker' in navigator) {
-            // Must have NO leading slash so it loads relative to your GitHub Page
             await navigator.serviceWorker.register('sw.js', { scope: __uv$config.prefix });
             console.log("Proxy Ready.");
         }
@@ -21,13 +26,8 @@ async function initProxy() {
 initProxy();
 
 // --- Proxy Routing Logic ---
-async function loadProxy(query, customName = null) {
+function loadProxy(query, customName = null) {
     if (!query) return;
-
-    // WAIT for the proxy engine to boot up to prevent the "Cannot GET" crash
-    if ('serviceWorker' in navigator) {
-        await navigator.serviceWorker.ready;
-    }
 
     let fullUrl = query.trim();
     if (!fullUrl.includes('.') || fullUrl.includes(' ')) {
@@ -54,7 +54,7 @@ async function loadProxy(query, customName = null) {
     switchView('proxy');
 }
 
-// --- RESTORED: KEYBOARD EVENT LISTENERS ---
+// --- KEYBOARD EVENT LISTENERS ---
 document.getElementById('search-bar').addEventListener('keypress', e => {
     if (e.key === 'Enter') { 
         e.preventDefault(); 
@@ -69,12 +69,11 @@ document.getElementById('proxy-url-bar').addEventListener('keypress', e => {
     }
 });
 
-// --- RESTORED: Remote GitHub Games Fetcher ---
+// --- Remote GitHub Games Fetcher ---
 async function initGames() {
     const grid = document.getElementById('games-grid');
     if (!grid || grid.children.length > 0) return; 
 
-    // Pointed directly at genizy/web-port
     const githubUser = "genizy"; 
     const githubRepo = "web-port"; 
 
