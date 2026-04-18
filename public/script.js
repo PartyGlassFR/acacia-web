@@ -1,17 +1,21 @@
-// --- Initialize Proxy Engine (Fixing the Cannot GET error) ---
+// --- Initialize Proxy Engine (Using Public Community Servers) ---
 async function initProxy() {
     try {
-        // 1. Register the Service Worker FIRST
+        const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
+        
+        // Using a cluster of public servers so you don't have to host the backend!
+        const bareServers = [
+            "https://tomp.app/",
+            "https://bare.benrogo.net/",
+            "https://bare.z1g.top/"
+        ];
+
+        await connection.setTransport("/bareasmodule3/dist/index.mjs", bareServers);
+        
         if ('serviceWorker' in navigator) {
             await navigator.serviceWorker.register('/sw.js', { scope: __uv$config.prefix });
-            console.log("Service Worker Registered.");
+            console.log("Proxy Ready.");
         }
-
-        // 2. Then set up the Bare Transport connection
-        const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
-        await connection.setTransport("/bareasmodule3/dist/index.mjs", [location.origin + "/bare/"]);
-        
-        console.log("Proxy Engine Fully Ready.");
     } catch (err) { console.error("Proxy Error:", err); }
 }
 initProxy();
