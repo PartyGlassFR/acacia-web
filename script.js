@@ -1,8 +1,9 @@
-// --- Initialize Proxy Engine (Fixing the Pathing Error) ---
+// --- Initialize Proxy Engine (Forcing Absolute HTTPS URL) ---
 async function initProxy() {
     try {
-        // CRITICAL FIX: The path MUST start with a slash and include your repo name!
-        const connection = new BareMux.BareMuxConnection("/acacia-web/baremux-worker.js");
+        // CRITICAL FIX: We use location.origin to force a full "https://..." URL so the engine stops complaining
+        const workerUrl = location.origin + "/acacia-web/baremux-worker.js";
+        const connection = new BareMux.BareMuxConnection(workerUrl);
         
         const bareServers = [
             "https://tomp.app/",
@@ -13,7 +14,6 @@ async function initProxy() {
         await connection.setTransport("https://esm.sh/@mercuryworkshop/bare-as-module3@2.0.1", bareServers);
         
         if ('serviceWorker' in navigator) {
-            // Also explicitly using the absolute path here for safety
             await navigator.serviceWorker.register('/acacia-web/sw.js', { scope: __uv$config.prefix });
             console.log("Proxy Ready.");
         }
