@@ -1,28 +1,29 @@
-// --- Initialize Proxy Engine (Server Cluster Fix) ---
+// --- Initialize Proxy Engine (Fixing the Cannot GET error) ---
 async function initProxy() {
     try {
-        const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
-        
-        // A cluster of community servers to prevent your home Wi-Fi from being blocked
-        const bareServers = [
-            "https://bare.benrogo.net/",
-            "https://bare.z1g.top/",
-            location.origin + "/bare/" // Your local server as a final backup
-        ];
-
-        await connection.setTransport("/bareasmodule3/dist/index.mjs", bareServers);
-        
+        // 1. Register the Service Worker FIRST
         if ('serviceWorker' in navigator) {
             await navigator.serviceWorker.register('/sw.js', { scope: __uv$config.prefix });
-            console.log("Proxy Ready.");
+            console.log("Service Worker Registered.");
         }
+
+        // 2. Then set up the Bare Transport connection
+        const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
+        await connection.setTransport("/bareasmodule3/dist/index.mjs", [location.origin + "/bare/"]);
+        
+        console.log("Proxy Engine Fully Ready.");
     } catch (err) { console.error("Proxy Error:", err); }
 }
 initProxy();
 
 // --- Proxy Routing Logic ---
-function loadProxy(query, customName = null) {
+async function loadProxy(query, customName = null) {
     if (!query) return;
+
+    // CRITICAL FIX: Wait for the proxy engine to be 100% online before loading the iframe
+    if ('serviceWorker' in navigator) {
+        await navigator.serviceWorker.ready;
+    }
 
     let fullUrl = query.trim();
     let useProxy = true;
@@ -36,7 +37,7 @@ function loadProxy(query, customName = null) {
     else if (fullUrl.startsWith('http://') || fullUrl.startsWith('https://')) {
         fullUrl = query;
     } 
-    // 3. Search via Bing (Google's anti-bot system is too aggressive for local testing)
+    // 3. Search via Bing
     else if (!fullUrl.includes('.') || fullUrl.includes(' ')) {
         fullUrl = 'https://www.bing.com/search?q=' + encodeURIComponent(fullUrl);
     } 
@@ -58,15 +59,19 @@ function loadProxy(query, customName = null) {
         urlBar.blur(); 
     }
 
-    // Load the URL directly into the iframe (Preserves History for the Back Button!)
-    const frame = document.getElementById('proxy-frame');
-    if (frame) {
-        frame.src = useProxy ? (__uv$config.prefix + __uv$config.encodeUrl(fullUrl)) : fullUrl;
+    // Safely replace the iframe to prevent Service Worker crashes
+    const container = document.getElementById('proxy-container');
+    if (container) {
+        container.innerHTML = ''; 
+        const newFrame = document.createElement('iframe');
+        newFrame.id = 'proxy-frame';
+        newFrame.style.cssText = "width:100%; height:100%; border:none;";
+        newFrame.src = useProxy ? (__uv$config.prefix + __uv$config.encodeUrl(fullUrl)) : fullUrl;
+        container.appendChild(newFrame);
     }
 
     switchView('proxy');
 }
-
 // --- KEYBOARD EVENT LISTENERS ---
 document.getElementById('search-bar').addEventListener('keypress', e => {
     if (e.key === 'Enter') { 
