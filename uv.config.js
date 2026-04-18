@@ -1,6 +1,6 @@
 self.__uv$config = {
     prefix: '/acacia-web/uv/service/',
-    bare: 'https://bare.benrogo.net/', // Swapped from tomp.app to a working bridge!
+    bare: 'https://bare.z1g.top/',
     encodeUrl: Ultraviolet.codec.xor.encode,
     decodeUrl: Ultraviolet.codec.xor.decode,
     handler: '/acacia-web/uv.handler.js',
