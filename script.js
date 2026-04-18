@@ -1,7 +1,7 @@
-// --- Initialize Proxy Engine (Fixing CORS & Blob Blocks) ---
+// --- Initialize Proxy Engine (Fixing the JS CDN Crash) ---
 async function initProxy() {
     try {
-        // We use the real local file you just made to bypass browser security blocks!
+        // HACK: Bypass CORS blocks using your local worker file
         const connection = new BareMux.BareMuxConnection("baremux-worker.js");
         
         const bareServers = [
@@ -10,7 +10,10 @@ async function initProxy() {
             "https://bare.z1g.top/"
         ];
 
-        await connection.setTransport("https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-as-module3@2.0.1/dist/index.mjs", bareServers);
+        // CRITICAL FIX: We changed the CDN from jsdelivr to esm.sh. 
+        // jsdelivr crashes because it leaves missing dependencies behind. 
+        // esm.sh bundles all the missing pieces together so the browser doesn't panic!
+        await connection.setTransport("https://esm.sh/@mercuryworkshop/bare-as-module3@2.0.1", bareServers);
         
         if ('serviceWorker' in navigator) {
             await navigator.serviceWorker.register('sw.js', { scope: __uv$config.prefix });
