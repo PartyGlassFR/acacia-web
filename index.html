@@ -14,13 +14,6 @@
 
     <div id="leaf-container"></div>
 
-    <div class="top-nav">
-        <span onclick="switchView('home')">Home</span> &bull; 
-        <span onclick="switchView('games')">Games</span> &bull; 
-        <span onclick="loadProxy('https://monochrome.tf', 'Monochrome')">Monochrome</span> &bull; 
-        <span onclick="toggleSettings()">Settings</span>
-    </div>
-
     <section id="home-view" class="view active-view">
         <div class="logo-large">ACACIA</div>
         
@@ -29,7 +22,7 @@
             <p class="search-hint">Press Enter to unblock</p>
         </div>
 
-<div class="ad-container">
+        <div class="ad-container">
             <span class="ad-label">Advertisement</span>
             <div id="acacia-banner-ad" class="ad-box-placeholder">
                 Ad Slot (728x90)
@@ -39,70 +32,53 @@
         <div class="quick-apps">
             <div class="app-grid-pills">
                 <div class="app-pill" onclick="loadProxy('youtube.com')">
-                    <img src="https://www.google.com/s2/favicons?sz=64&domain=youtube.com" class="app-icon" alt="YouTube">
+                    <img src="https://www.google.com/s2/favicons?sz=64&domain=youtube.com" class="app-icon" alt="YouTube" style="width:24px; border-radius:4px;">
                     <span>YouTube</span>
                 </div>
                 <div class="app-pill" onclick="loadProxy('discord.com')">
-                    <img src="https://www.google.com/s2/favicons?sz=64&domain=discord.com" class="app-icon" alt="Discord">
+                    <img src="https://www.google.com/s2/favicons?sz=64&domain=discord.com" class="app-icon" alt="Discord" style="width:24px; border-radius:4px;">
                     <span>Discord</span>
                 </div>
                 <div class="app-pill" onclick="loadProxy('tiktok.com')">
-                    <img src="https://www.google.com/s2/favicons?sz=64&domain=tiktok.com" class="app-icon" alt="TikTok">
+                    <img src="https://www.google.com/s2/favicons?sz=64&domain=tiktok.com" class="app-icon" alt="TikTok" style="width:24px; border-radius:4px;">
                     <span>TikTok</span>
                 </div>
-                <div class="app-pill" onclick="loadProxy('crazygames.com')">
-                    <img src="https://www.google.com/s2/favicons?sz=64&domain=crazygames.com" class="app-icon" alt="Games">
-                    <span>Games</span>
-                </div>
             </div>
+        </div>
+
+        <div class="top-nav">
+            <span onclick="switchView('home')">Home</span> &bull; 
+            <span onclick="switchView('games')">Games</span> &bull; 
+            <span onclick="loadProxy('https://monochrome.tf', 'Monochrome')">Monochrome</span> &bull; 
+            <span onclick="toggleSettings()">Settings</span>
         </div>
     </section>
 
     <section id="games-view" class="view">
         <div class="logo-large">GAMES</div>
+        <div class="top-nav" style="margin-top: -2rem; margin-bottom: 2rem;">
+            <span onclick="switchView('home')">Back to Home</span>
+        </div>
         <div class="games-grid" id="games-grid">
             </div>
     </section>
 
-    <section id="music-view" class="view">
-        <div class="logo-large">MONOCHROME</div>
-        <div class="music-player-container">
-            <div class="music-card monochrome-card">
-                <div class="album-art" id="monochrome-art"></div>
-                <div class="song-info">
-                    <h2 id="song-title">System Idle</h2>
-                    <p id="song-artist">Monochrome Audio Engine</p>
-                </div>
-                <div class="player-controls">
-                    <button class="ctrl-btn">⏮</button>
-                    <button class="ctrl-btn play-main">▶</button>
-                    <button class="ctrl-btn">⏭</button>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <section id="proxy-view" class="view dock-bottom">
-        
         <iframe id="proxy-frame" src=""></iframe>
         
         <div class="floating-dock">
-            <button class="ctrl-btn" onclick="switchView('home');" title="Home">
+            <button class="ctrl-btn" onclick="switchView('home'); document.getElementById('proxy-frame').src = '';" title="Home">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
             </button>
-            
             <button class="ctrl-btn" onclick="document.getElementById('proxy-frame').contentWindow.history.back();" title="Back">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
             </button>
-            
             <button class="ctrl-btn" onclick="document.getElementById('proxy-frame').contentWindow.history.forward();" title="Forward">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
             </button>
-            
             <button class="ctrl-btn" onclick="document.getElementById('proxy-frame').contentWindow.location.reload();" title="Reload">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
             </button>
-            
             <input type="text" id="proxy-url-bar" class="proxy-url-input" placeholder="Search or enter address...">
             
             <button class="ctrl-btn" onclick="toggleSettings()" title="Settings">
@@ -129,6 +105,7 @@
                         <div class="mode-selector">
                             <div class="mode-btn">Light</div>
                             <div class="mode-btn active-mode">Dark</div>
+                            <div class="mode-btn">System</div>
                         </div>
                     </div>
 
@@ -152,6 +129,13 @@
                             <option value="dock-right">Right</option>
                         </select>
                     </div>
+
+                    <div class="settings-ad-container">
+                        <span class="ad-label">Advertisement</span>
+                        <div id="acacia-settings-ad-1" class="ad-box-placeholder">
+                            Settings Ad Slot (728x90)
+                        </div>
+                    </div>
                 </div>
 
                 <div id="tab-privacy" class="settings-tab">
@@ -162,20 +146,18 @@
                     </div>
                     
                     <div class="settings-card setting-row-card">
-                        <div><h3>Anti-Close</h3><p>Show a confirmation popup when closing the tab.</p></div>
+                        <div><h3>Anti-Close</h3><p>Show a confirmation popup.</p></div>
                         <label class="switch"><input type="checkbox" id="anticlose-toggle"><span class="slider"></span></label>
                     </div>
-
-
-
+                    
                     <div class="settings-card setting-row-card">
                         <div><h3>Auto Cloak</h3><p>Disguise tab title and icon.</p></div>
                         <label class="switch"><input type="checkbox" id="cloak-toggle"><span class="slider"></span></label>
-
                     </div>
-<div class="settings-ad-container">
+
+                    <div class="settings-ad-container">
                         <span class="ad-label">Advertisement</span>
-                        <div id="acacia-settings-ad-1" class="ad-box-placeholder">
+                        <div id="acacia-settings-ad-2" class="ad-box-placeholder">
                             Settings Ad Slot (728x90)
                         </div>
                     </div>
