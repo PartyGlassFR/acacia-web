@@ -1,13 +1,8 @@
-// --- Initialize Proxy Engine (Fixing the CORS Silent Crash) ---
+// --- Initialize Proxy Engine (Fixing CORS & Blob Blocks) ---
 async function initProxy() {
     try {
-        // HACK: Browsers strictly block Web Workers from other websites. 
-        // We create a fake local file (Blob) to bypass the security block!
-        const workerCode = `importScripts("https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-mux@2.0.1/dist/worker.js");`;
-        const workerBlob = new Blob([workerCode], { type: "text/javascript" });
-        const workerUrl = URL.createObjectURL(workerBlob);
-
-        const connection = new BareMux.BareMuxConnection(workerUrl);
+        // We use the real local file you just made to bypass browser security blocks!
+        const connection = new BareMux.BareMuxConnection("baremux-worker.js");
         
         const bareServers = [
             "https://tomp.app/",
@@ -69,7 +64,7 @@ document.getElementById('proxy-url-bar').addEventListener('keypress', e => {
     }
 });
 
-// --- Remote GitHub Games Fetcher ---
+// --- Remote GitHub Games Fetcher (Offline Placeholder Fix) ---
 async function initGames() {
     const grid = document.getElementById('games-grid');
     if (!grid || grid.children.length > 0) return; 
@@ -86,6 +81,9 @@ async function initGames() {
         const data = await response.json();
         grid.innerHTML = ''; 
 
+        // This is an OFFLINE image. It literally cannot be blocked by your firewall!
+        const offlinePlaceholder = `data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="120"%3E%3Crect width="100%25" height="100%25" fill="%23222"/%3E%3Ctext x="50%25" y="50%25" fill="%23a7f3d0" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle"%3ENo Image%3C/text%3E%3C/svg%3E`;
+
         data.forEach(item => {
             if (item.type === "dir") { 
                 const gameName = item.name.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -95,7 +93,7 @@ async function initGames() {
                 const card = document.createElement('div');
                 card.className = 'game-card';
                 card.innerHTML = `
-                    <img src="${thumb}" class="game-thumb" alt="${gameName}" onerror="this.src='https://via.placeholder.com/200x120/222222/a7f3d0?text=${encodeURIComponent(gameName)}'">
+                    <img src="${thumb}" class="game-thumb" alt="${gameName}" onerror="this.src='${offlinePlaceholder}'">
                     <div class="game-info">${gameName}</div>
                 `;
                 card.onclick = () => loadProxy(playUrl, gameName);
