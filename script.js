@@ -16,7 +16,7 @@ function loadProxy(query, customName = null) {
 
     let fullUrl = query.trim();
     if (!fullUrl.includes('.') || fullUrl.includes(' ')) {
-        fullUrl = 'https://www.bing.com/search?q=' + encodeURIComponent(fullUrl);
+        fullUrl = 'https://duckduckgo.com/?q=' + encodeURIComponent(fullUrl);
     } else if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) {
         fullUrl = 'https://' + fullUrl;
     }
