@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acacia</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="/uv/uv.bundle.js"></script>
+    <script src="/uv.config.js"></script>
+    <script src="/baremux/index.js"></script>
+</head>
+<body>
+
+    <div id="leaf-container"></div>
+
+    <div class="top-nav">
+        <span onclick="switchView('home')">Home</span> &bull; 
+        <span onclick="switchView('games')">Games</span> &bull; 
+        <span onclick="loadProxy('https://monochrome.tf', 'Monochrome')">Monochrome</span> &bull; 
+        <span onclick="toggleSettings()">Settings</span>
+    </div>
+
+    <section id="home-view" class="view active-view">
+        <div class="logo-large">ACACIA</div>
+        
+        <div class="search-container">
+            <input type="text" placeholder="search the web or type a URL..." id="search-bar">
+            <p class="search-hint">Press Enter to unblock</p>
+        </div>
+
+<div class="ad-container">
+            <span class="ad-label">Advertisement</span>
+            <div id="acacia-banner-ad" class="ad-box-placeholder">
+                Ad Slot (728x90)
+            </div>
+        </div>
+
+        <div class="quick-apps">
+            <div class="app-grid-pills">
+                <div class="app-pill" onclick="loadProxy('youtube.com')">
+                    <img src="https://www.google.com/s2/favicons?sz=64&domain=youtube.com" class="app-icon" alt="YouTube">
+                    <span>YouTube</span>
+                </div>
+                <div class="app-pill" onclick="loadProxy('discord.com')">
+                    <img src="https://www.google.com/s2/favicons?sz=64&domain=discord.com" class="app-icon" alt="Discord">
+                    <span>Discord</span>
+                </div>
+                <div class="app-pill" onclick="loadProxy('tiktok.com')">
+                    <img src="https://www.google.com/s2/favicons?sz=64&domain=tiktok.com" class="app-icon" alt="TikTok">
+                    <span>TikTok</span>
+                </div>
+                <div class="app-pill" onclick="loadProxy('crazygames.com')">
+                    <img src="https://www.google.com/s2/favicons?sz=64&domain=crazygames.com" class="app-icon" alt="Games">
+                    <span>Games</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="games-view" class="view">
+        <div class="logo-large">GAMES</div>
+        <div class="games-grid" id="games-grid">
+            </div>
+    </section>
+
+    <section id="music-view" class="view">
+        <div class="logo-large">MONOCHROME</div>
+        <div class="music-player-container">
+            <div class="music-card monochrome-card">
+                <div class="album-art" id="monochrome-art"></div>
+                <div class="song-info">
+                    <h2 id="song-title">System Idle</h2>
+                    <p id="song-artist">Monochrome Audio Engine</p>
+                </div>
+                <div class="player-controls">
+                    <button class="ctrl-btn">⏮</button>
+                    <button class="ctrl-btn play-main">▶</button>
+                    <button class="ctrl-btn">⏭</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="proxy-view" class="view dock-bottom">
+        
+        <iframe id="proxy-frame" src=""></iframe>
+        
+        <div class="floating-dock">
+            <button class="ctrl-btn" onclick="switchView('home');" title="Home">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            </button>
+            
+            <button class="ctrl-btn" onclick="document.getElementById('proxy-frame').contentWindow.history.back();" title="Back">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </button>
+            
+            <button class="ctrl-btn" onclick="document.getElementById('proxy-frame').contentWindow.history.forward();" title="Forward">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+            
+            <button class="ctrl-btn" onclick="document.getElementById('proxy-frame').contentWindow.location.reload();" title="Reload">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+            </button>
+            
+            <input type="text" id="proxy-url-bar" class="proxy-url-input" placeholder="Search or enter address...">
+            
+            <button class="ctrl-btn" onclick="toggleSettings()" title="Settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </button>
+        </div>
+    </section>
+
+    <div id="settings-view" class="settings-overlay">
+        <div class="settings-modal">
+            <div class="settings-header">
+                <h2 class="logo-settings">ACACIA</h2>
+                <ul id="settings-menu" class="settings-tabs">
+                    <li class="active" onclick="switchSettingsTab('appearance', this)">Appearance</li>
+                    <li onclick="switchSettingsTab('privacy', this)">Privacy & Security</li>
+                </ul>
+                <div class="close-btn" onclick="toggleSettings()">✕</div>
+            </div>
+            
+            <div class="settings-content">
+                <div id="tab-appearance" class="settings-tab active-tab">
+                    <div class="settings-card">
+                        <h3>Mode</h3>
+                        <div class="mode-selector">
+                            <div class="mode-btn">Light</div>
+                            <div class="mode-btn active-mode">Dark</div>
+                        </div>
+                    </div>
+
+                    <div class="settings-card setting-row-card">
+                        <div>
+                            <h3>Stealth Launch</h3>
+                            <p>Open Acacia in an invisible about:blank tab.</p>
+                        </div>
+                        <button class="themed-btn" onclick="launchStealth()">Launch Stealth</button>
+                    </div>
+
+                    <div class="settings-card setting-row-card">
+                        <div>
+                            <h3>Browser Controls Position</h3>
+                            <p>Where the navigation pill appears.</p>
+                        </div>
+                        <select id="control-position" class="dropdown">
+                            <option value="dock-bottom">Bottom</option>
+                            <option value="dock-top">Top</option>
+                            <option value="dock-left">Left</option>
+                            <option value="dock-right">Right</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="tab-privacy" class="settings-tab">
+                    <div class="settings-card">
+                        <h3>Panic Button</h3>
+                        <div class="setting-row"><label>Panic Key</label><span class="badge">Escape</span></div>
+                        <div class="setting-col"><label>Redirect URL</label><input type="text" id="panic-url" class="full-input" value="https://classroom.google.com"></div>
+                    </div>
+                    
+                    <div class="settings-card setting-row-card">
+                        <div><h3>Anti-Close</h3><p>Show a confirmation popup when closing the tab.</p></div>
+                        <label class="switch"><input type="checkbox" id="anticlose-toggle"><span class="slider"></span></label>
+                    </div>
+
+
+
+                    <div class="settings-card setting-row-card">
+                        <div><h3>Auto Cloak</h3><p>Disguise tab title and icon.</p></div>
+                        <label class="switch"><input type="checkbox" id="cloak-toggle"><span class="slider"></span></label>
+
+                    </div>
+<div class="settings-ad-container">
+                        <span class="ad-label">Advertisement</span>
+                        <div id="acacia-settings-ad-1" class="ad-box-placeholder">
+                            Settings Ad Slot (728x90)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

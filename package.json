@@ -1,0 +1,15 @@
+{
+  "name": "acacia",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@mercuryworkshop/bare-as-module3": "^2.0.1",
+    "@mercuryworkshop/bare-mux": "^2.0.1",
+    "@titaniumnetwork-dev/ultraviolet": "^3.2.1",
+    "@tomphttp/bare-server-node": "^2.0.1",
+    "express": "^4.18.2"
+  }
+}
