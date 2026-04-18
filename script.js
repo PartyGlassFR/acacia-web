@@ -12,7 +12,7 @@ async function initProxy() {
         await connection.setTransport("https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-as-module3@2.0.1/dist/index.mjs", bareServers);
         
         if ('serviceWorker' in navigator) {
-            // No leading slash here!
+            // Must have NO leading slash so it loads relative to your GitHub Page
             await navigator.serviceWorker.register('sw.js', { scope: __uv$config.prefix });
             console.log("Proxy Ready.");
         }
@@ -24,33 +24,18 @@ initProxy();
 async function loadProxy(query, customName = null) {
     if (!query) return;
 
-    // CRITICAL FIX: Wait for the proxy engine to be 100% online before loading the iframe
+    // WAIT for the proxy engine to boot up to prevent the "Cannot GET" crash
     if ('serviceWorker' in navigator) {
         await navigator.serviceWorker.ready;
     }
 
     let fullUrl = query.trim();
-    let useProxy = true;
-
-    // 1. Skip proxy for local games
-    if (fullUrl.startsWith(window.location.origin) || fullUrl.startsWith('/games/')) {
-        fullUrl = query;
-        useProxy = false; 
-    } 
-    // 2. Direct links
-    else if (fullUrl.startsWith('http://') || fullUrl.startsWith('https://')) {
-        fullUrl = query;
-    } 
-    // 3. Search via Bing
-    else if (!fullUrl.includes('.') || fullUrl.includes(' ')) {
+    if (!fullUrl.includes('.') || fullUrl.includes(' ')) {
         fullUrl = 'https://www.bing.com/search?q=' + encodeURIComponent(fullUrl);
-    } 
-    // 4. Missing https://
-    else {
+    } else if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) {
         fullUrl = 'https://' + fullUrl;
     }
 
-    // UI Bar handling
     const urlBar = document.getElementById('proxy-url-bar');
     if (urlBar) {
         if (customName) {
@@ -63,20 +48,13 @@ async function loadProxy(query, customName = null) {
         urlBar.blur(); 
     }
 
-    // Safely replace the iframe to prevent Service Worker crashes
-    const container = document.getElementById('proxy-container');
-    if (container) {
-        container.innerHTML = ''; 
-        const newFrame = document.createElement('iframe');
-        newFrame.id = 'proxy-frame';
-        newFrame.style.cssText = "width:100%; height:100%; border:none;";
-        newFrame.src = useProxy ? (__uv$config.prefix + __uv$config.encodeUrl(fullUrl)) : fullUrl;
-        container.appendChild(newFrame);
-    }
-
+    const frame = document.getElementById('proxy-frame');
+    if(frame) frame.src = __uv$config.prefix + __uv$config.encodeUrl(fullUrl);
+    
     switchView('proxy');
 }
-// --- KEYBOARD EVENT LISTENERS ---
+
+// --- RESTORED: KEYBOARD EVENT LISTENERS ---
 document.getElementById('search-bar').addEventListener('keypress', e => {
     if (e.key === 'Enter') { 
         e.preventDefault(); 
@@ -91,57 +69,43 @@ document.getElementById('proxy-url-bar').addEventListener('keypress', e => {
     }
 });
 
-
-// --- Remote GitHub Games Fetcher ---
-// --- Remote GitHub Games Fetcher (Root Directory Fix) ---
+// --- RESTORED: Remote GitHub Games Fetcher ---
 async function initGames() {
     const grid = document.getElementById('games-grid');
     if (!grid || grid.children.length > 0) return; 
 
-// 🛑 CHANGE THESE 2 VARIABLES TO MATCH THE REPO YOU FOUND 🛑
+    // Pointed directly at genizy/web-port
     const githubUser = "genizy"; 
-    const githubRepo = "web-port";
+    const githubRepo = "web-port"; 
 
     grid.innerHTML = '<p style="color:#a7f3d0; text-align:center; width:100%;">Syncing games from GitHub...</p>';
 
     try {
-        // Ping the GitHub API to get the root contents of the repo
         const response = await fetch(`https://api.github.com/repos/${githubUser}/${githubRepo}/contents/`);
-        
-        if (!response.ok) throw new Error("GitHub API rate limit or wrong repo details.");
+        if (!response.ok) throw new Error("GitHub API Error.");
         
         const data = await response.json();
-        grid.innerHTML = ''; // Clear the loading text
+        grid.innerHTML = ''; 
 
         data.forEach(item => {
-            // We only want folders, not stray files like README.md
             if (item.type === "dir") { 
-                // Format "retro-bowl" into "Retro Bowl"
                 const gameName = item.name.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                
-                // Construct the live GitHub Pages URL for the game
                 const playUrl = `https://${githubUser}.github.io/${githubRepo}/${item.name}/`;
-                
-                // Construct the raw image URL straight from the main branch
                 const thumb = `https://raw.githubusercontent.com/${githubUser}/${githubRepo}/main/${item.name}/thumbnail.png`;
 
                 const card = document.createElement('div');
                 card.className = 'game-card';
-                
-                // The onerror tag ensures that if the repo didn't include an image, it uses a sleek placeholder
                 card.innerHTML = `
                     <img src="${thumb}" class="game-thumb" alt="${gameName}" onerror="this.src='https://via.placeholder.com/200x120/222222/a7f3d0?text=${encodeURIComponent(gameName)}'">
                     <div class="game-info">${gameName}</div>
                 `;
-                
-                // Route the remote game straight through your proxy engine
                 card.onclick = () => loadProxy(playUrl, gameName);
                 grid.appendChild(card);
             }
         });
     } catch (err) {
-        console.error("Failed to sync remote games:", err);
-        grid.innerHTML = '<p style="color:#ff6b6b; text-align:center; width:100%;">Failed to connect to the game database. Check the repo details in script.js.</p>';
+        console.error("Failed to sync:", err);
+        grid.innerHTML = '<p style="color:#ff6b6b; text-align:center; width:100%;">Failed to load games database.</p>';
     }
 }
 
@@ -149,13 +113,10 @@ async function initGames() {
 function switchView(viewName) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
     document.getElementById(`${viewName}-view`).classList.add('active-view');
-    
     if (viewName === 'games') initGames();
 }
 
-function toggleSettings() {
-    document.getElementById('settings-view').classList.toggle('show');
-}
+function toggleSettings() { document.getElementById('settings-view').classList.toggle('show'); }
 
 function switchSettingsTab(tabName, element) {
     document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active-tab'));
@@ -164,7 +125,7 @@ function switchSettingsTab(tabName, element) {
     element.classList.add('active');
 }
 
-// --- Dynamic Settings & Browser Storage ---
+// --- Dynamic Settings ---
 const savedDock = localStorage.getItem('acacia-dock') || 'dock-bottom';
 document.getElementById('proxy-view').classList.add(savedDock);
 document.getElementById('control-position').value = savedDock;
@@ -176,13 +137,10 @@ document.getElementById('control-position').addEventListener('change', e => {
     localStorage.setItem('acacia-dock', e.target.value);
 });
 
-// --- Light/Dark Mode Logic ---
+// --- Theme Logic ---
 function setMode(mode) {
-    if (mode === 'light') {
-        document.documentElement.setAttribute('data-mode', 'light');
-    } else {
-        document.documentElement.removeAttribute('data-mode');
-    }
+    if (mode === 'light') { document.documentElement.setAttribute('data-mode', 'light'); } 
+    else { document.documentElement.removeAttribute('data-mode'); }
     
     document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active-mode'));
     const activeBtn = Array.from(document.querySelectorAll('.mode-btn')).find(b => b.innerText.toLowerCase() === mode);
@@ -198,7 +156,7 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
 const savedMode = localStorage.getItem('acacia-mode') || 'dark';
 setMode(savedMode);
 
-// --- Privacy Tools (Anti-Close, Cloak, Panic) ---
+// --- Privacy Tools ---
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') window.location.replace(document.getElementById('panic-url').value);
 });
@@ -220,9 +178,10 @@ function launchStealth() {
     iframe.style.cssText = "width:100%;height:100%;border:none;position:fixed;top:0;left:0;";
     iframe.src = url;
     win.document.body.appendChild(iframe);
+    window.location.replace("https://classroom.google.com");
 }
 
-// --- Leaf Animation Generation ---
+// --- Aesthetics ---
 for (let i = 0; i < 20; i++) {
     let leaf = document.createElement('div');
     leaf.className = 'leaf';
