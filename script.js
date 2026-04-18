@@ -1,8 +1,11 @@
-// --- Initialize Proxy Engine (Forcing Absolute HTTPS URL) ---
+// --- Initialize Proxy Engine (The Master Fix) ---
 async function initProxy() {
     try {
-        // CRITICAL FIX: We use location.origin to force a full "https://..." URL so the engine stops complaining
-        const workerUrl = location.origin + "/acacia-web/baremux-worker.js";
+        // 1. The Blob Hack: This successfully bypasses the cross-origin security block!
+        const workerCode = `importScripts("https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-mux@2.0.1/dist/worker.js");`;
+        const workerBlob = new Blob([workerCode], { type: "text/javascript" });
+        const workerUrl = URL.createObjectURL(workerBlob);
+
         const connection = new BareMux.BareMuxConnection(workerUrl);
         
         const bareServers = [
@@ -11,6 +14,7 @@ async function initProxy() {
             "https://bare.z1g.top/"
         ];
 
+        // 2. The esm.sh CDN: This successfully bundles all the missing transport pieces!
         await connection.setTransport("https://esm.sh/@mercuryworkshop/bare-as-module3@2.0.1", bareServers);
         
         if ('serviceWorker' in navigator) {
