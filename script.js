@@ -1,8 +1,8 @@
-// --- Initialize Proxy Engine (Fixing the JS CDN Crash) ---
+// --- Initialize Proxy Engine (Fixing the Pathing Error) ---
 async function initProxy() {
     try {
-        // HACK: Bypass CORS blocks using your local worker file
-        const connection = new BareMux.BareMuxConnection("baremux-worker.js");
+        // CRITICAL FIX: The path MUST start with a slash and include your repo name!
+        const connection = new BareMux.BareMuxConnection("/acacia-web/baremux-worker.js");
         
         const bareServers = [
             "https://tomp.app/",
@@ -10,13 +10,11 @@ async function initProxy() {
             "https://bare.z1g.top/"
         ];
 
-        // CRITICAL FIX: We changed the CDN from jsdelivr to esm.sh. 
-        // jsdelivr crashes because it leaves missing dependencies behind. 
-        // esm.sh bundles all the missing pieces together so the browser doesn't panic!
         await connection.setTransport("https://esm.sh/@mercuryworkshop/bare-as-module3@2.0.1", bareServers);
         
         if ('serviceWorker' in navigator) {
-            await navigator.serviceWorker.register('sw.js', { scope: __uv$config.prefix });
+            // Also explicitly using the absolute path here for safety
+            await navigator.serviceWorker.register('/acacia-web/sw.js', { scope: __uv$config.prefix });
             console.log("Proxy Ready.");
         }
     } catch (err) { console.error("Proxy Error:", err); }
