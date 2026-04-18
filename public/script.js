@@ -83,33 +83,56 @@ document.getElementById('proxy-url-bar').addEventListener('keypress', e => {
 });
 
 
-// --- Dynamic Games Scanner ---
+// --- Remote GitHub Games Fetcher ---
+// --- Remote GitHub Games Fetcher (Root Directory Fix) ---
 async function initGames() {
     const grid = document.getElementById('games-grid');
     if (!grid || grid.children.length > 0) return; 
 
+// 🛑 CHANGE THESE 2 VARIABLES TO MATCH THE REPO YOU FOUND 🛑
+    const githubUser = "genizy"; 
+    const githubRepo = "web-port";
+
+    grid.innerHTML = '<p style="color:#a7f3d0; text-align:center; width:100%;">Syncing games from GitHub...</p>';
+
     try {
-        const response = await fetch('/api/games');
-        const games = await response.json();
+        // Ping the GitHub API to get the root contents of the repo
+        const response = await fetch(`https://api.github.com/repos/${githubUser}/${githubRepo}/contents/`);
+        
+        if (!response.ok) throw new Error("GitHub API rate limit or wrong repo details.");
+        
+        const data = await response.json();
+        grid.innerHTML = ''; // Clear the loading text
 
-        if (games.length === 0) {
-            grid.innerHTML = '<p style="color:#888; text-align:center; width:100%;">No games found. Put folders in public/games/</p>';
-            return;
-        }
+        data.forEach(item => {
+            // We only want folders, not stray files like README.md
+            if (item.type === "dir") { 
+                // Format "retro-bowl" into "Retro Bowl"
+                const gameName = item.name.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                
+                // Construct the live GitHub Pages URL for the game
+                const playUrl = `https://${githubUser}.github.io/${githubRepo}/${item.name}/`;
+                
+                // Construct the raw image URL straight from the main branch
+                const thumb = `https://raw.githubusercontent.com/${githubUser}/${githubRepo}/main/${item.name}/thumbnail.png`;
 
-        games.forEach(game => {
-            const card = document.createElement('div');
-            card.className = 'game-card';
-            card.innerHTML = `
-                <img src="${game.thumb}" class="game-thumb" alt="${game.name}">
-                <div class="game-info">${game.name}</div>
-            `;
-            const fullLocalUrl = window.location.origin + game.path;
-            card.onclick = () => loadProxy(fullLocalUrl, game.name);
-            grid.appendChild(card);
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                
+                // The onerror tag ensures that if the repo didn't include an image, it uses a sleek placeholder
+                card.innerHTML = `
+                    <img src="${thumb}" class="game-thumb" alt="${gameName}" onerror="this.src='https://via.placeholder.com/200x120/222222/a7f3d0?text=${encodeURIComponent(gameName)}'">
+                    <div class="game-info">${gameName}</div>
+                `;
+                
+                // Route the remote game straight through your proxy engine
+                card.onclick = () => loadProxy(playUrl, gameName);
+                grid.appendChild(card);
+            }
         });
     } catch (err) {
-        console.error("Failed to load games:", err);
+        console.error("Failed to sync remote games:", err);
+        grid.innerHTML = '<p style="color:#ff6b6b; text-align:center; width:100%;">Failed to connect to the game database. Check the repo details in script.js.</p>';
     }
 }
 
