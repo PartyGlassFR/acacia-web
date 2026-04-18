@@ -1,25 +1,10 @@
-// --- Initialize Proxy Engine (The Master Fix) ---
+// --- Initialize Proxy Engine (UV v2 Stable Edition) ---
 async function initProxy() {
     try {
-        // 1. The Blob Hack: This successfully bypasses the cross-origin security block!
-        const workerCode = `importScripts("https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-mux@2.0.1/dist/worker.js");`;
-        const workerBlob = new Blob([workerCode], { type: "text/javascript" });
-        const workerUrl = URL.createObjectURL(workerBlob);
-
-        const connection = new BareMux.BareMuxConnection(workerUrl);
-        
-        const bareServers = [
-            "https://tomp.app/",
-            "https://bare.benrogo.net/",
-            "https://bare.z1g.top/"
-        ];
-
-        // 2. The esm.sh CDN: This successfully bundles all the missing transport pieces!
-        await connection.setTransport("https://esm.sh/@mercuryworkshop/bare-as-module3@2.0.1", bareServers);
-        
         if ('serviceWorker' in navigator) {
+            // No bare-mux required! Just register the worker directly.
             await navigator.serviceWorker.register('/acacia-web/sw.js', { scope: __uv$config.prefix });
-            console.log("Proxy Ready.");
+            console.log("Proxy Ready (v2).");
         }
     } catch (err) { console.error("Proxy Error:", err); }
 }
